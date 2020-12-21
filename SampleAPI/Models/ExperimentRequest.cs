@@ -6,7 +6,7 @@ namespace SampleAPI.Models
 	{
 		public int AllowedPlates { get; set; }
 
-		public IEnumerable<Experiment> Experiments { get; set; }
+		public IList<Experiment> Experiments { get; set; }
 
 		public int TraySize { get; set; }
 	}

@@ -2,8 +2,8 @@
 
 namespace SampleAPI.Models
 {
-	public class ExperimentResult
+	public class ExperimentResult : BaseResult
 	{
-		public IEnumerable<Tray> Trays { get; set; }
+		public Tray[] Trays { get; set; }
 	}
 }

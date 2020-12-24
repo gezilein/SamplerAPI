@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace SampleAPI.Models
+﻿namespace SampleAPI.Models
 {
 	public class ExperimentResult : BaseResult
 	{

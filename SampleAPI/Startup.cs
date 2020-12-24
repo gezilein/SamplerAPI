@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Text.Json.Serialization;
 
 namespace SampleAPI
 {
 	public class Startup
 	{
+		private readonly string AllowSpecificOrigins = "AllowSpecificOrigins";
+
 		public Startup(IConfiguration configuration)
 		{
 			Configuration = configuration;
@@ -25,7 +26,7 @@ namespace SampleAPI
 			}
 
 			app.UseRouting();
-
+			app.UseCors(AllowSpecificOrigins);
 			//app.UseAuthorization();
 
 			app.UseEndpoints(endpoints =>
@@ -40,6 +41,15 @@ namespace SampleAPI
 			services.AddControllers().AddJsonOptions(options =>
 			{
 				//options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+			});
+
+			services.AddCors(options =>
+			{
+				options.AddPolicy(name: AllowSpecificOrigins, builder =>
+				{
+					builder.AllowAnyOrigin();
+					builder.AllowAnyHeader();
+				});
 			});
 		}
 	}

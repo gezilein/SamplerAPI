@@ -5,9 +5,11 @@
 	<title>Sampler API visualization</title>
 	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
 	<style>
-		div#trays {}
-		.tray { border: solid 2px grey;  }
-		.tray > div {  }
+		div#trays { }
+		.tray { border: solid 2px grey; float: left; clear: both; margin-bottom: 20px; }
+		.tray > div { display: inline-block; float: left; width: 70px; height: 70px; border: solid 1px #000; margin: 1px; }
+		.tray > div > div { float: right; top: 30px; position: relative; }
+		.tray > div.c0 { clear: left; }
 	</style>
 </head>
 
@@ -15,12 +17,12 @@
 	<div id="trays"></div>
 	<script async>
 		var colorSource = [
-			'white', 'silver', 'gray', 'black', 'red', 'maroon', 'yellow',
+			'silver', 'gray', 'red', 'maroon', 'yellow',
 			'olive', 'lime', 'green', 'aqua', 'teal', 'blue', 'navy', 'fuchsia',
 			'purple', '#daa718', '#4da279', '#95ff3a', '#86d0b1', '#2fc4e1', '#a5a5cf',
 			'#dd2026', '#f5af01', '#9dcca5', '#59beb1', '#80f35e', '#e16b70', '#5dab74',
 			'#aff2d7', '#37c071'];
-		
+
 		$(() => {
 			$
 				.post({
@@ -30,7 +32,7 @@
 					crossDomain: true,
 					dataType: 'json',
 					data: JSON.stringify({
-						"AllowedPlates": 1,
+						"AllowedPlates": 3,
 						"TraySize": 96,
 						"Experiments": [
 							{
@@ -42,7 +44,7 @@
 								"Reagents": [
 									"Pink"
 								],
-								"Replicates": 2
+								"Replicates": 20
 							},
 							{
 								"Samples": [
@@ -53,35 +55,52 @@
 								"Reagents": [
 									"Green"
 								],
-								"Replicates": 3
+								"Replicates": 30
 							}
 						]
 					})
 				})
 				.done((r) => {
-					if (r.message = "OK") {
+					if (r.message === 'OK') {
+						let colorIndex = -1; //to track with different colors
 						r.trays.forEach((t, i) => {
 							let tray = $(document.createElement('div')).addClass('tray').appendTo('div#trays');
-							let colorIndex = -1;
-							let sample = '';
-							t.wells.forEach((w, j) => {
-								if (sample !== w.sample)
-								{
+							if (t === null) {
+								return;
+							}
+
+							let trayColumns = t.traySize === 96 ? 12 : 24; //know the number of needed columns
+							let columnIndex = 0;
+							let rowIndex = 0;
+							for (var i = 0; i < t.traySize; i++) { //fill with "empty" wells
+
+								tray.append('<div class="well c' + (columnIndex++) + ' r' + rowIndex + '"></div>');
+								if (columnIndex % trayColumns == 0) {
+									columnIndex = 0;
+									rowIndex++;
+								}
+							}
+
+							let reagent = ''; //current reagent
+							let sample = ''; //current sample
+							t.wells.forEach((w, j) => { //every well in current tray
+								if (reagent !== w.reagent || sample !== w.sample) { //if experiment changes, change color (visualization only)
+									reagent = w.reagent;
 									sample = w.sample;
 									colorIndex++;
 								}
-								tray.append('<div class="well" style="background:'+ colorSource[colorIndex] +'">' + w.sample + '<span>' + w.reagent + '</span></div>');
-								if (t.traySize === 96 && w.column == 12 || t.traySize===384 && w.column==)
-								{
-								}
+								tray.find('div.well.c' + (w.column - 1) + '.r' + (w.row - 1)) //find existing well
+									.html(w.sample + '<div>' + w.reagent + '</div>') //fill with corresponding data
+									.css('background', colorSource[colorIndex]);
 
-							});
+							})
 						})
 					}
 					else {
 						$('div#trays').html(r.message)
 					}
 				})
+				.fail((r, s) => $('div#trays').html('Error connectiong to service: ' + s));
 		});
 	</script>
 </body>

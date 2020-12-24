@@ -4,4 +4,9 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Models\Plate.cs" />
+    <Compile Remove="Models\Replicate.cs" />
+  </ItemGroup>
+
 </Project>

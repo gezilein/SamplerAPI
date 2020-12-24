@@ -55,8 +55,8 @@ namespace SampleAPI.Controllers
 						var groupingKey = group.Key;
 						foreach (var well in group)
 						{
-							well.Row = rowIndex;
-							well.Column = columnIndex;
+							well.Row = rowIndex + 1;
+							well.Column = columnIndex + 1;
 							result.Trays[trayIndex].Wells.Add(well);
 
 							columnIndex++;

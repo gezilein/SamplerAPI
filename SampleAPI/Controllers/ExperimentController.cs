@@ -44,43 +44,48 @@ namespace SampleAPI.Controllers
 				var groups = wells.GroupBy(w => w.GroupingKey); //group by most numerous (set internally in preparation part)
 
 				result.Trays = new Tray[request.AllowedPlates];
-				for (var trayIndex = 0; trayIndex < result.Trays.Length; trayIndex++)
+				//for (var trayIndex = 0; trayIndex < result.Trays.Length; trayIndex++)
+				//{
+				var trayIndex = 0;
+				result.Trays[trayIndex] = new Tray { TraySize = request.TraySize };
+
+				var rowIndex = 0;
+				foreach (var group in groups)
 				{
-					result.Trays[trayIndex] = new Tray { TraySize = request.TraySize };
-
-					var rowIndex = 0;
-					foreach (var group in groups)
+					var columnIndex = 0;
+					var groupingKey = group.Key;
+					foreach (var well in group)
 					{
-						var columnIndex = 0;
-						var groupingKey = group.Key;
-						foreach (var well in group)
+						well.Row = rowIndex + 1;
+						well.Column = columnIndex + 1;
+						result.Trays[trayIndex].Wells.Add(well);
+
+						columnIndex++;
+
+						if (columnIndex % result.Trays[trayIndex].Columns == 0 //new row if current row is filled
+							|| groupingKey != well.GroupingKey) //or sample changed
 						{
-							well.Row = rowIndex + 1;
-							well.Column = columnIndex + 1;
-							result.Trays[trayIndex].Wells.Add(well);
-
-							columnIndex++;
-
-							if (columnIndex % result.Trays[trayIndex].Columns == 0 //new row if current row is filled
-								|| groupingKey != well.GroupingKey) //or sample changed
-							{
-								columnIndex = 0;
-								rowIndex++;
-								groupingKey = well.GroupingKey;
-							}
+							columnIndex = 0;
+							rowIndex++;
+							groupingKey = well.GroupingKey;
 						}
-
-						if (result.Trays[trayIndex].Wells.Count >= result.Trays[trayIndex].TraySize) //new tray (should break if allowed trays is breached)
+						
+						if (rowIndex >= result.Trays[trayIndex].Rows) //new tray (should break if allowed trays is breached)
 						{
 							if (trayIndex++ == request.AllowedPlates)
 							{
 								throw new ArgumentOutOfRangeException("AllowedPlates", "Number of allowed plates has been breached");
 							}
-						}
 
-						rowIndex++;
+							result.Trays[trayIndex] = new Tray { TraySize = request.TraySize };
+							rowIndex = 0;
+							columnIndex = 0;
+						}
 					}
+
+					rowIndex++;
 				}
+				//}
 
 				result.Message = "OK";
 			}
